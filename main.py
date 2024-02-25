@@ -22,6 +22,8 @@ def create_7z(service_name, directories, password, backup_location, ssh_keys):
             else:
                 for root, dirs, files in os.walk(directory):
                     for file in files:
+                        if file.endswith(".sock"):
+                            continue
                         file_path = os.path.join(root, file)
                         rel_name = os.path.relpath(file_path, directory)
                         arcname = os.path.join(os.path.basename(directory), rel_name)
@@ -57,9 +59,7 @@ def download_from_ssh(archive: SevenZipFile, ssh_directory, ssh_keys):
     try:
         with ssh.open_sftp() as sftp:
             for remote_file_path in sftp_walk(sftp, remote_path):
-                print(os.path.basename(remote_path))
                 arcname = os.path.join(os.path.basename(remote_path), remote_file_path[len(remote_path)+1:])
-                print(f"arcname {arcname}")
                 with sftp.file(remote_file_path, 'r') as remote_file:
                     archive.writestr(remote_file.read(), arcname)
     finally:
@@ -70,7 +70,6 @@ def sftp_walk(sftp, path):
     files = []
     for item in sftp.listdir_attr(path):
         if S_ISDIR(item.st_mode):
-            print(xjoin(path, item.filename))
             files.extend(sftp_walk(sftp, xjoin(path, item.filename)))
         else:
             files.append(xjoin(path, item.filename))
