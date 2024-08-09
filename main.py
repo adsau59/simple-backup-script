@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 import py7zr
 import paramiko
 from datetime import datetime
@@ -81,7 +82,7 @@ def xjoin(*args):
 
 def main():
     # Load JSON from file
-    with open('config.json', 'r') as json_file:
+    with open(sys.argv[1], 'r') as json_file:
         config = json.load(json_file)
 
     backup_location = config['backup_location']
